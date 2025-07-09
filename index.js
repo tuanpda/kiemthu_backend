@@ -13,12 +13,20 @@ dotenv.config();
 app.use(cookieParser());
 
 // app.use(cors());
-const allowedOrigins = ["http://localhost", "http://14.224.129.177", "http://localhost:1979", "http://14.224.129.177:1979", "http://localhost:80", "http://14.224.129.177:80"];
+const allowedOrigins = [
+  "http://localhost",
+  "http://14.224.129.177",
+  "http://localhost:1979",
+  "http://14.224.129.177:1979",
+  "http://localhost:80",
+  "http://14.224.129.177:80",
+  "http://ansinhhonglam.com/",
+];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log('Request Origin:', origin); // 👈 Thêm dòng này để debug
+      console.log("Request Origin:", origin); // 👈 Thêm dòng này để debug
 
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
