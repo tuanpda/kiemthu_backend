@@ -13,7 +13,7 @@ dotenv.config();
 app.use(cookieParser());
 
 // app.use(cors());
-const allowedOrigins = ["http://localhost:1979", "http://14.224.129.177:1979"];
+const allowedOrigins = ["http://localhost:1979", "http://14.224.129.177:1979", "http://localhost", "http://14.224.129.177"];
 
 app.use(
   cors({
