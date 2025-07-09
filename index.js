@@ -20,7 +20,7 @@ const allowedOrigins = [
   "http://14.224.129.177:1979",
   "http://localhost:80",
   "http://14.224.129.177:80",
-  "http://ansinhhonglam.com/",
+  "http://ansinhhonglam.com",
 ];
 
 app.use(
