@@ -20,10 +20,10 @@ if (checkDB === "tcdvthu_ansinh159") {
   // var folderBienlaidientu =
   // "/Users/apple/Documents/code/p_159/tcdvthu_ansinh159_client/static/avatar"; // macos
   urlServer = "14.224.129.177:1970";
-} else {
+} else if (checkDB === "tcdvthu_ansinhhonglam") {
   folderAvatar =
-    "E:\\CODE_APP\\TCDVTHU\\ANSINH68\\tcdvthu_ansinh68_client\\static\\avatar";
-  urlServer = "14.224.129.177:1973";
+    "E:\\CODE_APP\\TCDVTHU\\ANSINHHONGLAM\\honglam_client\\static\\avatar";
+  urlServer = "ansinhhonglam.com";
 }
 
 // console.log("=====================");

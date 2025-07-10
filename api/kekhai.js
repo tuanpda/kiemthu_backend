@@ -31,12 +31,10 @@ if (checkDB === "tcdvthu_ansinh159") {
   // "/Users/apple/Documents/code/p_159";
   urlServer = "14.224.129.177:1970";
   urlServerBackend = "14.224.129.177:4213"; // máy chủ tuấn pda
-} else {
+} else if (checkDB === "tcdvthu_ansinhhonglam"){
   thumucbienlai =
-    "E:\\CODE_APP\\TCDVTHU\\ANSINH68\\tcdvthu_ansinh68_client\\static\\bienlaidientu";
+    "E:\\CODE_APP\\TCDVTHU\\ANSINHHONGLAM\\honglam_client\\static\\bienlaidientu";
     // "D:\\";  
-  urlServer = "14.224.129.177:1973";
-  urlServerBackend = "14.224.129.177:4209"; // máy chủ tuấn pda
 }
 
 // console.log("=====================");
