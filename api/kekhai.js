@@ -35,6 +35,7 @@ if (checkDB === "tcdvthu_ansinh159") {
   thumucbienlai =
     "E:\\CODE_APP\\TCDVTHU\\ANSINHHONGLAM\\honglam_client\\static\\bienlaidientu";
     // "D:\\";  
+    // "/Users/wolf/Code\ Project/";
 }
 
 // console.log("=====================");
