@@ -316,6 +316,22 @@ WHERE matinh = '42'
   }
 });
 
+// danh mục bệnh viện cho thị xã kỳ anh
+router.get("/dmbenhvienwithtinh-thachha", async (req, res) => {
+  try {
+    await pool.connect();
+    const result = await pool.request()
+      .query(`SELECT * 
+FROM dm_benhvien 
+WHERE matinh = '42' 
+  AND diachi LIKE N'%thạch hà%'`);
+    const benhvien = result.recordset;
+    res.json(benhvien);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
 // danh mục xã cho thị xã kỳ anh
 router.get("/dmxaphuong-camxuyen", async (req, res) => {
   try {
