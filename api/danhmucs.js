@@ -322,9 +322,13 @@ router.get("/dmbenhvienwithtinh-thachha", async (req, res) => {
     await pool.connect();
     const result = await pool.request()
       .query(`SELECT * 
-FROM dm_benhvien 
-WHERE matinh = '42' 
-  AND diachi LIKE N'%thạch hà%'`);
+        FROM dm_benhvien 
+        WHERE matinh = '42'
+          AND (
+            diachi LIKE N'%thạch hà%' 
+            OR diachi LIKE N'%thành phố%' 
+            OR diachi LIKE N'%cẩm xuyên%'
+          )`);
     const benhvien = result.recordset;
     res.json(benhvien);
   } catch (error) {
