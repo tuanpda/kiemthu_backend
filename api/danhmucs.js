@@ -328,6 +328,7 @@ router.get("/dmbenhvienwithtinh-thachha", async (req, res) => {
             diachi LIKE N'%thạch hà%' 
             OR diachi LIKE N'%thành phố%' 
             OR diachi LIKE N'%cẩm xuyên%'
+            OR diachi LIKE N'%TP Hà Tĩnh%'
           )`);
     const benhvien = result.recordset;
     res.json(benhvien);
