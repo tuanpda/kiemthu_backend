@@ -987,7 +987,6 @@ router.post("/cancel-invoice-status", async (req, res) => {
     _id,
     hoten,
     masobhxh,
-    ghichu,
     nguoipheduyet,
     ngaypheduyet,
     hosoIdentity,
@@ -1008,11 +1007,11 @@ router.post("/cancel-invoice-status", async (req, res) => {
     const request = transaction.request();
     await request
       .input("_id", _id)
-      .input("ghichu", ghichu)
+      .input("lydohuy", lydohuy)
       .input("nguoipheduyet", nguoipheduyet)
       .input("ngaypheduyet", ngaypheduyet)
       .query(
-        `UPDATE kekhai SET trangthai=1, ghichu=@ghichu, nguoipheduyet=@nguoipheduyet, ngaypheduyet=@ngaypheduyet WHERE _id=@_id`
+        `UPDATE kekhai SET trangthai=1, lydohuy=@lydohuy, nguoipheduyet=@nguoipheduyet, ngaypheduyet=@ngaypheduyet WHERE _id=@_id`
       );
 
     // Câu 2: cập nhật bảng bienlaidientu
