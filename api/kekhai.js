@@ -15,6 +15,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
+const axios = require('axios')
 
 // console.log(process.env.SQL_DATABASE);
 
@@ -2032,6 +2033,327 @@ router.get("/kykekhai-search-series-pagi-tonghop", async (req, res) => {
 });
 
 // tìm kiếm hồ sơ đối với nhân viên công ty
+router.get("/kykekhai-search-hoso-pheduyeths", async (req, res) => {
+  // console.log(req.query);
+
+  try {
+    const {
+      kykekhai,
+      sohoso,
+      dotkekhai,
+      ngaykekhai,
+      ngaykekhaiden,
+      masobhxh,
+      hoten,
+      tendaily,
+      maloaihinh,
+      trangthaihs,
+      page = 1,
+      limit = 30,
+    } = req.query;
+
+    // Chuyển đổi page và limit thành số nguyên
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const offset = (pageNumber - 1) * limitNumber;
+
+    // Chuyển đổi ngày người dùng nhập vào sang định dạng DD-MM-YYYY
+    // const [year, month, day] = ngaykekhai.split("-");
+    // let ngaykekhaiInput = day + "-" + month + "-" + year;
+    // const [yeard, monthd, dayd] = ngaykekhaiden.split("-");
+    // let ngaykekhaidenInput = dayd + "-" + monthd + "-" + yeard;
+    // // console.log(ngaykekhaiInput);
+
+    // Khởi tạo câu truy vấn cơ bản
+    let query = "SELECT * FROM kekhai WHERE 1=1";
+    let queryCount = "SELECT COUNT(*) AS totalCount FROM kekhai WHERE 1=1";
+
+    // Thêm các điều kiện tìm kiếm nếu có
+    // console.log(trangthaihs);
+    
+    if (trangthaihs) {
+      if(trangthaihs == 'dapheduyet'){
+        query += " AND trangthai = 0 and status_naptien=1";
+        queryCount += " AND trangthai = 0 and status_naptien=1";
+      }else if(trangthaihs == 'dahuyduyet'){
+        query += " AND trangthai = 1";
+        queryCount += " AND trangthai = 1";
+      }else if(trangthaihs == 'chuapheduyet'){
+        query += " AND trangthai = 0 and status_naptien=0";
+        queryCount += " AND trangthai = 0 and status_naptien=0";
+      }
+    }
+
+    if (kykekhai) {
+      query += " AND kykekhai = @kykekhai";
+      queryCount += " AND kykekhai = @kykekhai";
+    }
+    if (sohoso) {
+      query += " AND sohoso = @sohoso";
+      queryCount += " AND sohoso = @sohoso";
+    }
+    if (dotkekhai) {
+      query += " AND dotkekhai = @dotkekhai";
+      queryCount += " AND dotkekhai = @dotkekhai";
+    }
+    // if (ngaykekhai && !ngaykekhaiden) {
+    //   query += " AND CONVERT(VARCHAR(10), ngaykekhai, 105) = @ngaykekhai";
+    //   queryCount += " AND CONVERT(VARCHAR(10), ngaykekhai, 105) = @ngaykekhai";
+    // }
+    // if (ngaykekhai && ngaykekhaiden) {
+    //   query +=
+    //     " AND CONVERT(VARCHAR(10), ngaykekhai, 105) BETWEEN @ngaykekhai and @ngaykekhaiden";
+    //   queryCount +=
+    //     " AND CONVERT(VARCHAR(10), ngaykekhai, 105) BETWEEN @ngaykekhai and @ngaykekhaiden";
+    // }
+    if (ngaykekhai && !ngaykekhaiden) {
+      query += ` AND CONVERT(DATE, TRY_CONVERT(datetime, ngaykekhai, 105)) = @ngaykekhai`;
+      queryCount += ` AND CONVERT(DATE, TRY_CONVERT(datetime, ngaykekhai, 105)) = @ngaykekhai`;
+    }
+
+    if (ngaykekhai && ngaykekhaiden) {
+      query += ` AND CONVERT(DATE, TRY_CONVERT(datetime, ngaykekhai, 105)) BETWEEN @ngaykekhai AND @ngaykekhaiden`;
+      queryCount += ` AND CONVERT(DATE, TRY_CONVERT(datetime, ngaykekhai, 105)) BETWEEN @ngaykekhai AND @ngaykekhaiden`;
+    }
+
+    if (masobhxh) {
+      query += " AND masobhxh = @masobhxh";
+      queryCount += " AND masobhxh = @masobhxh";
+    }
+    if (hoten) {
+      query += " AND hoten like @hoten";
+      queryCount += " AND hoten like @hoten";
+    }
+    if (tendaily) {
+      query += " AND tendaily like @tendaily";
+      queryCount += " AND tendaily like @tendaily";
+    }
+    if (maloaihinh) {
+      query += " AND maloaihinh = @maloaihinh";
+      queryCount += " AND maloaihinh = @maloaihinh";
+    }
+
+    // Thêm phần phân trang CONVERT(VARCHAR(10), ngaykekhai, 105) BETWEEN '13-12-2024' AND '14-12-2024';
+    query +=
+      " ORDER BY _id desc OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
+
+    // console.log(query);
+
+    // Kết nối và thực thi truy vấn
+    await pool.connect();
+
+    const result = await pool
+      .request()
+      .input("kykekhai", kykekhai)
+      .input("sohoso", sohoso)
+      .input("dotkekhai", dotkekhai)
+      .input("ngaykekhai", ngaykekhai)
+      .input("ngaykekhaiden", ngaykekhaiden)
+      .input("masobhxh", masobhxh)
+      .input("maloaihinh", maloaihinh)
+      .input("hoten", `%${hoten}%`)
+      .input("tendaily", `%${tendaily}%`)
+      .input("offset", offset)
+      .input("limit", limitNumber)
+      .query(query);
+
+    const countResult = await pool
+      .request()
+      .input("kykekhai", kykekhai)
+      .input("sohoso", sohoso)
+      .input("dotkekhai", dotkekhai)
+      .input("ngaykekhai", ngaykekhai)
+      .input("ngaykekhaiden", ngaykekhaiden)
+      .input("masobhxh", masobhxh)
+      .input("maloaihinh", maloaihinh)
+      .input("hoten", `%${hoten}%`)
+      .input("tendaily", `%${tendaily}%`)
+      .query(queryCount);
+
+    const totalCount = countResult.recordset[0].totalCount;
+    const totalPages = Math.ceil(totalCount / limitNumber);
+
+    const info = {
+      count: totalCount,
+      pages: totalPages,
+      next:
+        pageNumber < totalPages
+          ? `${req.path}?page=${pageNumber + 1}&limit=${limit}`
+          : null,
+      prev:
+        pageNumber > 1
+          ? `${req.path}?page=${pageNumber - 1}&limit=${limit}`
+          : null,
+    };
+
+    // console.log(result.recordset);
+
+    res.json({ info, results: result.recordset });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// tìm kiếm hồ sơ đối với điểm thu
+router.get("/kykekhai-search-hoso-diemthu-pheduyeths", async (req, res) => {
+  // console.log(req.query);
+
+  try {
+    const {
+      kykekhai,
+      sohoso,
+      dotkekhai,
+      ngaykekhai,
+      ngaykekhaiden,
+      masobhxh,
+      maloaihinh,
+      hoten,
+      madaily,
+      cccd,
+      trangthaihs,
+      page = 1,
+      limit = 30,
+    } = req.query;
+
+    // Chuyển đổi page và limit thành số nguyên
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const offset = (pageNumber - 1) * limitNumber;
+
+    // Chuyển đổi ngày người dùng nhập vào sang định dạng DD-MM-YYYY
+    // const [year, month, day] = ngaykekhai.split("-");
+    // let ngaykekhaiInput = day + "-" + month + "-" + year;
+    // const [yeard, monthd, dayd] = ngaykekhaiden.split("-");
+    // let ngaykekhaidenInput = dayd + "-" + monthd + "-" + yeard;
+    // console.log(ngaykekhaiInput);
+
+    // Khởi tạo câu truy vấn cơ bản
+    let query = `SELECT * FROM kekhai WHERE RIGHT(sohoso, 12) = '${cccd}'`;
+    let queryCount =
+      `SELECT COUNT(*) AS totalCount FROM kekhai WHERE RIGHT(sohoso, 12) = '${cccd}'`;
+
+    // Thêm các điều kiện tìm kiếm nếu có
+    if (trangthaihs) {
+      if(trangthaihs == 'dapheduyet'){
+        query += " AND trangthai = 0 and status_naptien=1";
+        queryCount += " AND trangthai = 0 and status_naptien=1";
+      }else if(trangthaihs == 'dahuyduyet'){
+        query += " AND trangthai = 1";
+        queryCount += " AND trangthai = 1";
+      }else if(trangthaihs == 'chuapheduyet'){
+        query += " AND trangthai = 0 and status_naptien=0";
+        queryCount += " AND trangthai = 0 and status_naptien=0";
+      }
+    }
+
+    if (kykekhai) {
+      query += " AND kykekhai = @kykekhai";
+      queryCount += " AND kykekhai = @kykekhai";
+    }
+    if (sohoso) {
+      query += " AND sohoso = @sohoso";
+      queryCount += " AND sohoso = @sohoso";
+    }
+    if (dotkekhai) {
+      query += " AND dotkekhai = @dotkekhai";
+      queryCount += " AND dotkekhai = @dotkekhai";
+    }
+    // if (ngaykekhai && !ngaykekhaiden) {
+    //   query += " AND CONVERT(VARCHAR(10), ngaykekhai, 105) = @ngaykekhai";
+    //   queryCount += " AND CONVERT(VARCHAR(10), ngaykekhai, 105) = @ngaykekhai";
+    // }
+    // if (ngaykekhai && ngaykekhaiden) {
+    //   query +=
+    //     " AND CONVERT(VARCHAR(10), ngaykekhai, 105) BETWEEN @ngaykekhai and @ngaykekhaiden";
+    //   queryCount +=
+    //     " AND CONVERT(VARCHAR(10), ngaykekhai, 105) BETWEEN @ngaykekhai and @ngaykekhaiden";
+    // }
+
+    if (ngaykekhai && !ngaykekhaiden) {
+      query += ` AND CONVERT(DATE, TRY_CONVERT(datetime, ngaykekhai, 105)) = @ngaykekhai`;
+      queryCount += ` AND CONVERT(DATE, TRY_CONVERT(datetime, ngaykekhai, 105)) = @ngaykekhai`;
+    }
+
+    if (ngaykekhai && ngaykekhaiden) {
+      query += ` AND CONVERT(DATE, TRY_CONVERT(datetime, ngaykekhai, 105)) BETWEEN @ngaykekhai AND @ngaykekhaiden`;
+      queryCount += ` AND CONVERT(DATE, TRY_CONVERT(datetime, ngaykekhai, 105)) BETWEEN @ngaykekhai AND @ngaykekhaiden`;
+    }
+
+    if (masobhxh) {
+      query += " AND masobhxh = @masobhxh";
+      queryCount += " AND masobhxh = @masobhxh";
+    }
+    if (hoten) {
+      query += " AND hoten like @hoten";
+      queryCount += " AND hoten like @hoten";
+    }
+    if (maloaihinh) {
+      query += " AND maloaihinh = @maloaihinh";
+      queryCount += " AND maloaihinh = @maloaihinh";
+    }
+
+    // Thêm phần phân trang CONVERT(VARCHAR(10), ngaykekhai, 105) BETWEEN '13-12-2024' AND '14-12-2024';
+    query +=
+      " ORDER BY _id desc OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
+
+    // console.log(query);
+
+    // Kết nối và thực thi truy vấn
+    await pool.connect();
+
+    const result = await pool
+      .request()
+      .input("kykekhai", kykekhai)
+      .input("sohoso", sohoso)
+      .input("dotkekhai", dotkekhai)
+      .input("ngaykekhai", ngaykekhai)
+      .input("ngaykekhaiden", ngaykekhaiden)
+      .input("masobhxh", masobhxh)
+      .input("maloaihinh", maloaihinh)
+      .input("hoten", `%${hoten}%`)
+      .input("madaily", madaily)
+      .input("offset", offset)
+      .input("limit", limitNumber)
+      .query(query);
+
+    const countResult = await pool
+      .request()
+      .input("kykekhai", kykekhai)
+      .input("sohoso", sohoso)
+      .input("dotkekhai", dotkekhai)
+      .input("ngaykekhai", ngaykekhai)
+      .input("ngaykekhaiden", ngaykekhaiden)
+      .input("masobhxh", masobhxh)
+      .input("maloaihinh", maloaihinh)
+      .input("hoten", `%${hoten}%`)
+      .input("madaily", madaily)
+      .query(queryCount);
+
+    const totalCount = countResult.recordset[0].totalCount;
+    const totalPages = Math.ceil(totalCount / limitNumber);
+
+    const info = {
+      count: totalCount,
+      pages: totalPages,
+      next:
+        pageNumber < totalPages
+          ? `${req.path}?page=${pageNumber + 1}&limit=${limit}`
+          : null,
+      prev:
+        pageNumber > 1
+          ? `${req.path}?page=${pageNumber - 1}&limit=${limit}`
+          : null,
+    };
+
+    res.json({ info, results: result.recordset });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// tìm kiếm hồ sơ đối với nhân viên công ty
 router.get("/kykekhai-search-hoso", async (req, res) => {
   // console.log(req.query);
 
@@ -3521,5 +3843,63 @@ router.get("/bienlai-search-diemthu", async (req, res) => {
     pool.close();
   }
 });
+
+// HÀM TÌM THÔNG TIN MỚI
+let token = null
+
+async function getValidToken() {
+  if (!token) return await login()
+  try {
+    const decoded = jwt_decode(token)
+    const now = Math.floor(Date.now() / 1000)
+    if (decoded.exp && decoded.exp > now) return token
+    return await login()
+  } catch (e) {
+    return await login()
+  }
+}
+
+async function login() {
+  try {
+    const res = await axios.post('https://luongvinh.com/api/v1/auth/login', {
+      username: 'Nv093',
+      password: '456789@a',
+      email: '',
+      fullName: '',
+      confirm_password: ''
+    })
+    token = res.data?.token || res.data?.data?.token
+    return token
+  } catch (err) {
+    console.error('Lỗi đăng nhập:', err)
+    return null
+  }
+}
+
+// 🧠 API Tìm Thông Tin
+router.post('/getinfo', async (req, res) => {
+  // console.log('start')
+  const { masobhxh } = req.body
+  if (!masobhxh) return res.status(400).json({ success: false, error: 'Thiếu dữ liệu gửi lên' })
+  console.log(masobhxh)
+  try {
+    const validToken = await getValidToken()
+    if (!validToken) return res.status(401).json({ success: false, error: 'Không lấy được token' })
+
+    const apiUrl = `https://luongvinh.com/api/v1/kekhai/autocomplete/ar/${masobhxh}`
+    const result = await axios.get(apiUrl, {
+      headers: { Authorization: `Bearer ${validToken}` }
+    })
+
+    if (!result.data.success) throw new Error('Dữ liệu trả về không thành công')
+
+    const data = result.data.data.data
+    // console.log(data)
+    res.json({ success: true, data })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ success: false, error: 'Không tìm được thông tin' })
+  }
+})
 
 module.exports = router;
