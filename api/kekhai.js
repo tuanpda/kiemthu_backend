@@ -163,21 +163,23 @@ router.post("/add-kekhai", async (req, res) => {
       .input("dotkekhai", newSoHoSo)
       .input("kykekhai", req.body.kykekhai)
       .input("ngaykekhai", req.body.ngaykekhai)
-      .input("trangthai", req.body.trangthai).query(`
+      .input("trangthai", req.body.trangthai)
+      .input("maxaphuong_new", req.body.maxaphuong_new)
+      .input("tenxaphuong_new", req.body.tenxaphuong_new).query(`
                   INSERT INTO kekhai (sohoso, matochuc, tentochuc, madaily, tendaily, maloaihinh, tenloaihinh, hoten, masobhxh, cccd, dienthoai,	
                     maphuongan, tenphuongan, ngaysinh, gioitinh, nguoithu, tienluongcs, sotien,	
                     tylengansachdiaphuong, hotrokhac, tungay, tyledong, muctiendong,	
                     maphuongthucdong, tenphuongthucdong, tuthang, tientunguyendong, tienlai, madoituong,	
                     tendoituong, tylensnnht, tiennsnnht, tylensdp, tiennsdp, matinh, tentinh, maquanhuyen, tenquanhuyen,	
                     maxaphuong, tenxaphuong, benhvientinh, mabenhvien, tenbenhvien, tothon, ghichu,	
-                    createdAt, createdBy, updatedAt, updatedBy, dotkekhai, kykekhai, ngaykekhai, trangthai) 
+                    createdAt, createdBy, updatedAt, updatedBy, dotkekhai, kykekhai, ngaykekhai, trangthai, maxaphuong_new, tenxaphuong_new) 
                   VALUES (@sohoso, @matochuc, @tentochuc, @madaily, @tendaily, @maloaihinh, @tenloaihinh, @hoten, @masobhxh, @cccd, @dienthoai,	
                     @maphuongan, @tenphuongan, @ngaysinh, @gioitinh, @nguoithu, @tienluongcs, @sotien,	
                     @tylengansachdiaphuong, @hotrokhac, @tungay, @tyledong, @muctiendong,	
                     @maphuongthucdong, @tenphuongthucdong, @tuthang, @tientunguyendong, @tienlai, @madoituong,	
                     @tendoituong, @tylensnnht, @tiennsnnht, @tylensdp, @tiennsdp, @matinh, @tentinh, @maquanhuyen, @tenquanhuyen,	
                     @maxaphuong, @tenxaphuong, @benhvientinh, @mabenhvien, @tenbenhvien, @tothon, @ghichu,	
-                    @createdAt, @createdBy, @updatedAt, @updatedBy, @dotkekhai, @kykekhai, @ngaykekhai, @trangthai);
+                    @createdAt, @createdBy, @updatedAt, @updatedBy, @dotkekhai, @kykekhai, @ngaykekhai, @trangthai, @maxaphuong_new, @tenxaphuong_new);
               `);
     const kekhai = req.body;
     res.json(kekhai);
@@ -3887,6 +3889,32 @@ router.post('/getinfo', async (req, res) => {
     if (!validToken) return res.status(401).json({ success: false, error: 'Không lấy được token' })
 
     const apiUrl = `https://luongvinh.com/api/v1/kekhai/autocomplete/ar/${masobhxh}`
+    const result = await axios.get(apiUrl, {
+      headers: { Authorization: `Bearer ${validToken}` }
+    })
+
+    if (!result.data.success) throw new Error('Dữ liệu trả về không thành công')
+
+    const data = result.data.data.data
+    // console.log(data)
+    res.json({ success: true, data })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ success: false, error: 'Không tìm được thông tin' })
+  }
+})
+
+// 🧠 API Tìm Thông Tin
+router.post('/getinfo-bhxh', async (req, res) => {
+  // console.log('start')
+  const { masobhxh } = req.body
+  if (!masobhxh) return res.status(400).json({ success: false, error: 'Thiếu dữ liệu gửi lên' })
+  console.log(masobhxh)
+  try {
+    const validToken = await getValidToken()
+    if (!validToken) return res.status(401).json({ success: false, error: 'Không lấy được token' })
+
+    const apiUrl = `https://luongvinh.com/api/v1/kekhai/autocomplete/is/${masobhxh}`
     const result = await axios.get(apiUrl, {
       headers: { Authorization: `Bearer ${validToken}` }
     })
