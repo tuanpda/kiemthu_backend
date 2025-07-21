@@ -1049,7 +1049,10 @@ router.post("/cancel-invoice-status", async (req, res) => {
           WHERE hosoIdentity=@hosoIdentity`
       );
 
+      console.log('check trước');
     await transaction.commit();
+    console.log('check sau');
+    
 
     res.json({
       success: true,
@@ -1058,7 +1061,7 @@ router.post("/cancel-invoice-status", async (req, res) => {
         _id,
         hoten,
         masobhxh,
-        ghichu,
+        lydohuy,
       },
     });
   } catch (error) {
