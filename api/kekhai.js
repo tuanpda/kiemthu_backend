@@ -440,6 +440,8 @@ router.post("/update-hoso-kekhai", async (req, res) => {
 
 // add ke khai chạy theo bộ
 router.post("/add-kekhai-series", async (req, res) => {
+  // console.log(req.body);
+  
   let dataKekhai = req.body;
   let transaction = null;
   const listSuccess = [];
@@ -548,8 +550,8 @@ router.post("/add-kekhai-series", async (req, res) => {
           .input("hosoIdentity", item.hosoIdentity)
           .input("tennguoitao", item.tennguoitao)
           .input("hinhthucnap", item.hinhthucnap)
-          .input("maxaphuong_new", req.body.maxaphuong_new)
-          .input("tenxaphuong_new", req.body.tenxaphuong_new).query(`
+          .input("maxaphuong_new", item.maxaphuong_new)
+          .input("tenxaphuong_new", item.tenxaphuong_new).query(`
                   INSERT INTO kekhai (sohoso, matochuc, tentochuc, madaily, tendaily, maloaihinh, tenloaihinh, hoten, masobhxh, cccd, dienthoai,	
                     maphuongan, tenphuongan, ngaysinh, gioitinh, nguoithu, manguoithu, tienluongcs, sotien,	
                     tylengansachdiaphuong, hotrokhac, tungay, denngay, tyledong, muctiendong, sothang,
