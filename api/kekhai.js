@@ -99,6 +99,8 @@ router.post("/upload-bienlai-huy", uploadHuy.single("pdf"), (req, res) => {
 
 // add ke khai chạy lẻ từng dòng
 router.post("/add-kekhai", async (req, res) => {
+  // console.log(req.body);
+  
   try {
     await pool.connect();
     // Tạo số hồ sơ duy nhất
@@ -545,7 +547,9 @@ router.post("/add-kekhai-series", async (req, res) => {
           .input("status_naptien", item.status_naptien)
           .input("hosoIdentity", item.hosoIdentity)
           .input("tennguoitao", item.tennguoitao)
-          .input("hinhthucnap", item.hinhthucnap).query(`
+          .input("hinhthucnap", item.hinhthucnap)
+          .input("maxaphuong_new", req.body.maxaphuong_new)
+          .input("tenxaphuong_new", req.body.tenxaphuong_new).query(`
                   INSERT INTO kekhai (sohoso, matochuc, tentochuc, madaily, tendaily, maloaihinh, tenloaihinh, hoten, masobhxh, cccd, dienthoai,	
                     maphuongan, tenphuongan, ngaysinh, gioitinh, nguoithu, manguoithu, tienluongcs, sotien,	
                     tylengansachdiaphuong, hotrokhac, tungay, denngay, tyledong, muctiendong, sothang,
@@ -553,7 +557,7 @@ router.post("/add-kekhai-series", async (req, res) => {
                     tendoituong, tylensnnht, tiennsnnht, tylensdp, tiennsdp, matinh, tentinh, maquanhuyen, tenquanhuyen,	
                     maxaphuong, tenxaphuong, benhvientinh, mabenhvien, tenbenhvien, tothon, ghichu,	
                     createdAt, createdBy, updatedAt, updatedBy, dotkekhai, kykekhai, ngaykekhai, ngaybienlai, sobienlai, trangthai, 
-                    status_hosoloi, status_naptien, hosoIdentity, tennguoitao, hinhthucnap) 
+                    status_hosoloi, status_naptien, hosoIdentity, tennguoitao, hinhthucnap, maxaphuong_new, tenxaphuong_new) 
                   VALUES (@sohoso, @matochuc, @tentochuc, @madaily, @tendaily, @maloaihinh, @tenloaihinh, @hoten, @masobhxh, @cccd, @dienthoai,	
                     @maphuongan, @tenphuongan, @ngaysinh, @gioitinh, @nguoithu,@manguoithu, @tienluongcs, @sotien,	
                     @tylengansachdiaphuong, @hotrokhac, @tungay, @denngay, @tyledong, @muctiendong,	@sothang,
@@ -561,7 +565,7 @@ router.post("/add-kekhai-series", async (req, res) => {
                     @tendoituong, @tylensnnht, @tiennsnnht, @tylensdp, @tiennsdp, @matinh, @tentinh, @maquanhuyen, @tenquanhuyen,	
                     @maxaphuong, @tenxaphuong, @benhvientinh, @mabenhvien, @tenbenhvien, @tothon, @ghichu,	
                     @createdAt, @createdBy, @updatedAt, @updatedBy, @dotkekhai, @kykekhai, @ngaykekhai, @ngaybienlai, @sobienlai, @trangthai, 
-                    @status_hosoloi, @status_naptien, @hosoIdentity, @tennguoitao, @hinhthucnap);
+                    @status_hosoloi, @status_naptien, @hosoIdentity, @tennguoitao, @hinhthucnap, @maxaphuong_new, @tenxaphuong_new);
               `);
 
         // Commit transaction nếu không có lỗi
