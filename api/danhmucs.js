@@ -286,32 +286,32 @@ router.get("/dmluongcs", async (req, res) => {
 });
 
 // danh mục bệnh viện
-// router.get("/dmbenhvienwithtinh", async (req, res) => {
-//   try {
-//     await pool.connect();
-//     const result = await pool
-//       .request()
-//       .input("matinh", req.query.matinh)
-//       .query(`SELECT * FROM dm_benhvien where matinh=@matinh order by matinh`);
-//     const benhvien = result.recordset;
-//     res.json(benhvien);
-//   } catch (error) {
-//     res.status(500).json(error);
-//   }
-// });
-
 router.get("/dmbenhvienwithtinh", async (req, res) => {
   try {
     await pool.connect();
     const result = await pool
       .request()
-      .query(`SELECT * FROM dm_benhvien`);
+      .input("matinh", req.query.matinh)
+      .query(`SELECT * FROM dm_benhvien where matinh=@matinh order by matinh`);
     const benhvien = result.recordset;
     res.json(benhvien);
   } catch (error) {
     res.status(500).json(error);
   }
 });
+
+// router.get("/dmbenhvienwithtinh", async (req, res) => {
+//   try {
+//     await pool.connect();
+//     const result = await pool
+//       .request()
+//       .query(`SELECT * FROM dm_benhvien`);
+//     const benhvien = result.recordset;
+//     res.json(benhvien);
+//   } catch (error) {
+//     res.status(500).json(error);
+//   }
+// });
 
 // danh mục bệnh viện cho thị xã kỳ anh
 router.get("/dmbenhvienwithtinh-camxuyen", async (req, res) => {
